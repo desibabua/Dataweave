@@ -1,0 +1,62 @@
+@startuml
+skinparam nodesep 100
+skinparam ranksep 100
+
+actor user
+node LoadBalancer
+node RequestManager1 {
+   database cache1
+}
+node RequestManager2{
+  database cache2
+}
+node RequestManager3 {
+   database cache3
+}
+node Controller
+node MetadataManger
+node StorageNode1 {
+    rectangle partion1
+    rectangle partion2
+}
+node StorageNode2 {
+ rectangle partion3
+ rectangle partion4
+}
+node StorageNode3 {
+ rectangle partion5
+}
+file HDFS
+
+user --> LoadBalancer: 1
+
+LoadBalancer --> RequestManager1: 2
+LoadBalancer --> RequestManager2: 2
+LoadBalancer --> RequestManager3: 2
+
+MetadataManger <-- RequestManager1: 3
+MetadataManger <-- RequestManager2: 3
+MetadataManger <-- RequestManager3: 3
+
+RequestManager1 --> StorageNode1: 4
+RequestManager1 --> StorageNode2: 4
+RequestManager1 --> StorageNode3: 4
+
+RequestManager2 --> StorageNode1: 4
+RequestManager2 --> StorageNode2: 4
+RequestManager2 --> StorageNode3: 4
+
+RequestManager3 --> StorageNode1: 4
+RequestManager3 --> StorageNode2: 4
+RequestManager3 --> StorageNode3: 4
+
+StorageNode1 -- HDFS: 5
+StorageNode2 -- HDFS: 5
+StorageNode3 -- HDFS: 5
+
+Controller ...> StorageNode1: pollsForHealth
+Controller ...> StorageNode2: pollsForHealth
+Controller ...> StorageNode3: pollsForHealth
+
+Controller ..> MetadataManger: informsAboutFaultyNode
+@enduml
