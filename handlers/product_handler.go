@@ -1,23 +1,31 @@
 package handlers
 
 import (
-	"database/sql"
-	"fmt"
+	"encoding/json"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
+
+	"github.com/ravik-karn/Dataweave/products"
 )
 
-func HandleProduct(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "user:password@/dbname")
-	if err != nil {
-		panic(err.Error())
-	}
-	defer db.Close()
+func HandleProduct(logger logrus.Logger, fetcher products.Fetcher) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		products, err := fetcher.Fetch()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			logger.Errorf("Unable to fetch products: %s", err)
+			w.Write([]byte("Unable to fetch products"))
+			return
+		}
 
-	// Open doesn't open a connection. Validate DSN data:
-	err = db.Ping()
-	if err != nil {
-		panic(err.Error()) // proper error handling instead of panic in your app
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(products)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			logger.Errorf("error marshalling response: %s", err)
+			w.Write([]byte("Unable to fetch products"))
+			return
+		}
 	}
-
-	fmt.Fprintf(w, "Supported Routes: %s", r.URL.Path[1:])
 }

@@ -1,0 +1,9 @@
+{
+  "appPort": "8081",
+  "dbServer": "localhost",
+  "dbPort": "3306",
+  "dbName": "Dataweave_india",
+  "dbUsername": "root",
+  "dbPassword": "",
+  "dbTimeout": "10000"
+}

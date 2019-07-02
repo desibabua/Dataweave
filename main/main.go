@@ -2,29 +2,32 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"github.com/ravik-karn/Dataweave/factory"
 	"net/http"
-	"os"
 
-	"../config"
-	"../handlers"
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 
-	"src/github.com/gorilla/mux"
+	"github.com/ravik-karn/Dataweave/config"
+	"github.com/ravik-karn/Dataweave/handlers"
 )
 
 func main() {
-	os.Setenv("PORT", "8081")
-	port := os.Getenv("PORT")
-	if port == "" {
-		log.Fatal("$PORT must be set")
+	logger := logrus.New()
+	config, err := config.New("config.json")
+	if err != nil {
+		logger.Fatal("read config file: %s", err)
 	}
 
-	config := config.New("conf.yaml")
+	factory := factory.New(config, *logger)
 
 	r := mux.NewRouter()
+	r.HandleFunc("/", handlers.HandleMain())
+	r.HandleFunc("/products", handlers.HandleProduct(*logger, factory.ProductFetcher()))
 
-	r.HandleFunc("/", handlers.HandleMain)
-	r.HandleFunc("/products", handlers.HandleProduct)
-
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	err = http.ListenAndServe(fmt.Sprintf(":%s", config.AppPort), nil)
+	if err != nil {
+		logger.Fatal("start server: %s", err)
+	}
+	logger.Infof("Running on: %s", config.AppPort)
 }

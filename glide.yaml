@@ -1,5 +1,0 @@
-package: github.com/ravik-karn/Dataweave
-repo: github.com/ravik-karn/Dataweave
-import:
-- package: gopkg.in/yaml.v2
-- package: github.com/gorilla/mux

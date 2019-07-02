@@ -1,15 +1,24 @@
 package factory
 
-import "../config"
+import (
+	"github.com/sirupsen/logrus"
 
-type Factory interface {
+	"github.com/ravik-karn/Dataweave/config"
+	"github.com/ravik-karn/Dataweave/products"
+)
 
+type Factory struct {
+	config *config.Config
+	logger logrus.Logger
 }
 
-type DataWeaveFactory struct {
-
+func New(config *config.Config, logger logrus.Logger) Factory {
+	return Factory{
+		config: config,
+		logger: logger,
+	}
 }
 
-func New(conf *config.Config) Factory{
-	return &DataWeaveFactory {}
+func (f Factory) ProductFetcher() products.Fetcher {
+	return products.New(f.config, f.logger)
 }
